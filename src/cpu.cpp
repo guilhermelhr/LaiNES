@@ -6,6 +6,7 @@
 #include "joypad.hpp"
 #include "ppu.hpp"
 #include "cpu.hpp"
+#include <iostream>
 
 namespace CPU {
 
@@ -257,8 +258,11 @@ void power()
     INT<RESET>();
 }
 
+int framecount = 0;
+int distance;
+float accDistance = 0;
 /* Run the CPU for roughly a frame */
-void run_frame()
+void run_frame(int stopAt)
 {
     remainingCycles += TOTAL_CYCLES;
 
@@ -271,6 +275,24 @@ void run_frame()
     }
 
     APU::run_frame(elapsed());
+
+    float time = ram[0x68] * 60 + ram[0x69] + ram[0x6A] / 100.0;
+
+    framecount++;
+    if(framecount >= 690){
+    	int r50 = ram[0x50];
+
+    	if(r50 < distance){
+    		accDistance += 0xFF;
+    	}
+
+    	distance = r50;
+
+    	std::cout << (accDistance + r50) << std::endl;
+		if(time >= stopAt){
+			exit(0);
+		}
+    }
 }
 
 
